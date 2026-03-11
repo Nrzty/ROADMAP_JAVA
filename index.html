@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Roadmap — Júnior Dev</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00e676;
+            --green-dim: #00c853;
+            --bg: #0a0f0a;
+            --surface: #111811;
+            --surface2: #182018;
+            --border: #1e2e1e;
+            --text: #e8f5e9;
+            --muted: #5a7a5a;
+            --accent: #69f0ae;
+            --warn: #ffd740;
+            --danger: #ff5252;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* GRID BG */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                    linear-gradient(rgba(0,230,118,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,230,118,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; position: relative; z-index: 1; }
+
+        /* HEADER */
+        header { text-align: center; padding: 3rem 0 2rem; }
+        .badge {
+            display: inline-block;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--green);
+            border: 1px solid var(--green);
+            padding: 4px 12px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        h1 span { color: var(--green); }
+        .subtitle {
+            margin-top: 0.75rem;
+            color: var(--muted);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        /* PROGRESS BAR */
+        .progress-wrap {
+            margin: 2rem 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.2rem 1.5rem;
+        }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .progress-label { font-size: 0.8rem; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.05em; }
+        .progress-pct { font-size: 1.1rem; font-weight: 700; color: var(--green); font-family: 'Space Mono', monospace; }
+        .bar-bg { background: var(--border); height: 6px; }
+        .bar-fill { height: 6px; background: linear-gradient(90deg, var(--green), var(--accent)); transition: width 0.5s ease; width: 0%; }
+
+        /* LEGEND */
+        .legend {
+            display: flex; gap: 1.5rem; flex-wrap: wrap;
+            margin-bottom: 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+        .dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+        .dot-todo { background: var(--border); border: 1px solid var(--muted); }
+        .dot-doing { background: var(--warn); }
+        .dot-done { background: var(--green); }
+
+        /* PHASE */
+        .phase { margin-bottom: 2rem; }
+        .phase-header {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .phase-header:hover { background: var(--surface2); }
+        .phase-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--green);
+            min-width: 2rem;
+        }
+        .phase-title { font-size: 1.05rem; font-weight: 700; flex: 1; }
+        .phase-meta { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+        .phase-toggle { color: var(--muted); font-size: 0.9rem; transition: transform 0.3s; }
+        .phase.open .phase-toggle { transform: rotate(90deg); }
+
+        .phase-body { display: none; border: 1px solid var(--border); border-top: none; background: var(--surface); }
+        .phase.open .phase-body { display: block; }
+
+        /* TOPIC */
+        .topic {
+            display: flex; align-items: flex-start; gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .topic:last-child { border-bottom: none; }
+        .topic:hover { background: var(--surface2); }
+
+        .topic-check {
+            width: 20px; height: 20px;
+            border: 2px solid var(--muted);
+            flex-shrink: 0;
+            margin-top: 2px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+        }
+        .topic.done .topic-check { background: var(--green); border-color: var(--green); color: #000; }
+        .topic.doing .topic-check { background: var(--warn); border-color: var(--warn); color: #000; }
+
+        .topic-info { flex: 1; }
+        .topic-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .topic.done .topic-name { color: var(--muted); text-decoration: line-through; }
+        .topic-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+        .topic-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.5rem; }
+        .tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .tag-must { background: rgba(0,230,118,0.1); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+        .tag-market { background: rgba(105,240,174,0.07); color: var(--accent); border: 1px solid rgba(105,240,174,0.15); }
+        .tag-plus { background: rgba(255,215,64,0.07); color: var(--warn); border: 1px solid rgba(255,215,64,0.15); }
+
+        .topic-priority { display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+        .star { color: var(--warn); font-size: 0.75rem; }
+        .star.empty { color: var(--border); }
+
+        /* CYCLE BUTTON */
+        .cycle-hint {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            text-align: right;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* TEACHER TIP */
+        .tip-box {
+            margin: 2rem 0;
+            padding: 1.2rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid rgba(0,230,118,0.2);
+            border-left: 3px solid var(--green);
+            position: relative;
+        }
+        .tip-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--green);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .tip-text { font-size: 0.9rem; color: var(--text); line-height: 1.6; }
+        .tip-text strong { color: var(--green); }
+
+        /* RESET */
+        .reset-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--danger);
+            background: none;
+            border: 1px solid rgba(255,82,82,0.3);
+            padding: 6px 14px;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+        .reset-btn:hover { background: rgba(255,82,82,0.1); }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="badge">Roadmap Interativo</div>
+        <h1>Spring Boot<br><span>Desenvolvedor Júnior</span></h1>
+        <p class="subtitle">Clique em cada tópico para marcar como EM ANDAMENTO → FEITO → TODO</p>
+    </header>
+
+    <div class="progress-wrap">
+        <div class="progress-header">
+            <span class="progress-label">// SEU PROGRESSO</span>
+            <span class="progress-pct" id="pctLabel">0%</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" id="progressBar"></div></div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="dot dot-todo"></div> A fazer</div>
+        <div class="legend-item"><div class="dot dot-doing"></div> Em andamento</div>
+        <div class="legend-item"><div class="dot dot-done"></div> Concluído</div>
+    </div>
+
+    <p class="cycle-hint">→ clique para ciclar: TODO → EM ANDAMENTO → FEITO</p>
+
+    <div id="roadmap"></div>
+
+    <div class="tip-box">
+        <div class="tip-label">// Dica do Professor</div>
+        <div class="tip-text">
+            <strong>Por onde começar?</strong> Não tente absorver tudo de uma vez. A lógica ideal é:
+            dominar <strong>Java Core</strong> antes de tocar no Spring. Um dev Júnior que entende
+            bem de OOP, coleções e exceções vale mais do que alguém que só sabe copiar anotações do
+            Spring sem entender o porquê. <strong>Foque na Fase 1 por pelo menos 3–4 semanas</strong>
+            antes de avançar.
+        </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">↺ Resetar progresso</button>
+
+    <footer>roadmap.sh/spring-boot · adaptado para aprendizado orientado ao mercado</footer>
+</div>
+
+<script>
+    const phases = [
+        {
+            id: "p1",
+            num: "01",
+            title: "Fundamentos Java",
+            meta: "3–4 semanas · Base obrigatória",
+            topics: [
+                { id:"j1", name:"OOP — Orientação a Objetos", desc:"Herança, polimorfismo, encapsulamento, abstração. O Spring é 100% orientado a objetos — sem isso, você só decorará anotações.", tags:["must","market"], stars:5 },
+                { id:"j2", name:"Coleções & Generics", desc:"List, Map, Set e quando usar cada uma. Muito usado em serviços e repositórios.", tags:["must"], stars:5 },
+                { id:"j3", name:"Tratamento de Exceções", desc:"try/catch, checked vs unchecked, criar exceções customizadas. Fundamental para APIs REST limpas.", tags:["must","market"], stars:4 },
+                { id:"j4", name:"Interfaces & Classes Abstratas", desc:"O Spring usa interfaces em todo lugar (ex: CrudRepository). Você precisa entender o porquê.", tags:["must"], stars:5 },
+                { id:"j5", name:"Java 8+ (Lambdas, Streams, Optional)", desc:"Stream API e Optional são muito comuns em código Spring moderno. Sem isso você ficará perdido no código alheio.", tags:["must","market"], stars:4 },
+                { id:"j6", name:"Maven ou Gradle", desc:"Gerenciamento de dependências. Comece com Maven — mais comum em vagas Júnior.", tags:["must"], stars:3 },
+            ]
+        },
+        {
+            id: "p2",
+            num: "02",
+            title: "Core do Spring & Spring Boot",
+            meta: "3–5 semanas · Coração do framework",
+            topics: [
+                { id:"s1", name:"IoC e Injeção de Dependência", desc:"O conceito mais importante do Spring. Entenda @Component, @Service, @Repository, @Controller e como o container gerencia beans.", tags:["must","market"], stars:5 },
+                { id:"s2", name:"Spring Boot Auto-configuration", desc:"Como o Boot configura coisas automaticamente via @SpringBootApplication. Saber o que acontece 'por baixo' é diferencial.", tags:["must"], stars:4 },
+                { id:"s3", name:"application.properties / .yml", desc:"Configuração de ambientes, porta, banco, logging. Todo projeto usa isso.", tags:["must","market"], stars:4 },
+                { id:"s4", name:"Profiles (dev, staging, prod)", desc:"Separar configurações por ambiente. Muito cobrado em entrevistas de Júnior.", tags:["must","market"], stars:3 },
+                { id:"s5", name:"Logging com SLF4J + Logback", desc:"Logar corretamente é sinal de profissionalismo. Evite System.out.println().", tags:["market"], stars:3 },
+            ]
+        },
+        {
+            id: "p3",
+            num: "03",
+            title: "Spring MVC — APIs REST",
+            meta: "3–4 semanas · Foco do Júnior no mercado",
+            topics: [
+                { id:"r1", name:"@RestController, @GetMapping etc.", desc:"Criar endpoints REST. É o que todo projeto web faz.", tags:["must","market"], stars:5 },
+                { id:"r2", name:"Request Body, Path Variable, Params", desc:"Como receber dados na API — JSON, parâmetros de URL, headers.", tags:["must","market"], stars:5 },
+                { id:"r3", name:"ResponseEntity & códigos HTTP", desc:"Retornar 200, 201, 404, 400 corretamente. Entrevistas adoram isso.", tags:["must","market"], stars:4 },
+                { id:"r4", name:"Validação com Bean Validation (@Valid)", desc:"@NotNull, @Size, @Email — validar dados de entrada é prática de mercado.", tags:["must","market"], stars:4 },
+                { id:"r5", name:"Tratamento global de erros (@ControllerAdvice)", desc:"Centralizar erros numa classe só. Essencial para APIs limpas.", tags:["must","market"], stars:4 },
+                { id:"r6", name:"DTOs (Data Transfer Objects)", desc:"Separar a entidade do banco do que é exposto na API. Boa prática obrigatória no mercado.", tags:["must","market"], stars:5 },
+            ]
+        },
+        {
+            id: "p4",
+            num: "04",
+            title: "Persistência de Dados",
+            meta: "3–4 semanas · Spring Data JPA",
+            topics: [
+                { id:"db1", name:"JPA & Hibernate básico", desc:"Entidades, @Id, @GeneratedValue, relacionamentos (@OneToMany, @ManyToOne). Comece aqui antes de Spring Data.", tags:["must"], stars:5 },
+                { id:"db2", name:"Spring Data JPA — Repositories", desc:"JpaRepository, query methods (findByEmail, findByNomeContaining). O jeito Spring de acessar banco.", tags:["must","market"], stars:5 },
+                { id:"db3", name:"@Query e JPQL", desc:"Queries customizadas quando os métodos automáticos não bastam.", tags:["must"], stars:3 },
+                { id:"db4", name:"Flyway ou Liquibase (migrations)", desc:"Versionar o banco de dados. Muito exigido em projetos reais — quase todo emprego usa.", tags:["market","plus"], stars:4 },
+                { id:"db5", name:"PostgreSQL ou MySQL", desc:"Saber configurar a conexão e entender SQL básico. Use PostgreSQL — é o mais comum no backend moderno.", tags:["must","market"], stars:4 },
+            ]
+        },
+        {
+            id: "p5",
+            num: "05",
+            title: "Segurança",
+            meta: "2–3 semanas · Básico esperado no Júnior",
+            topics: [
+                { id:"sec1", name:"Spring Security — conceitos", desc:"Autenticação vs autorização. Filters, SecurityContext. Não precisa dominar tudo, mas precisa entender o fluxo.", tags:["must"], stars:4 },
+                { id:"sec2", name:"JWT (JSON Web Token)", desc:"O padrão de autenticação stateless mais usado em APIs REST no mercado.", tags:["must","market"], stars:5 },
+                { id:"sec3", name:"Roles e Permissões", desc:"@PreAuthorize, ROLE_USER, ROLE_ADMIN. Como proteger endpoints por perfil.", tags:["market"], stars:3 },
+            ]
+        },
+        {
+            id: "p6",
+            num: "06",
+            title: "Testes",
+            meta: "2–3 semanas · Diferencial para Júnior",
+            topics: [
+                { id:"t1", name:"JUnit 5 + Mockito", desc:"Testes unitários com mocks. Fundamental e muito cobrado. Júnior que testa se destaca.", tags:["must","market"], stars:5 },
+                { id:"t2", name:"@SpringBootTest — Testes de integração", desc:"Testar o contexto completo do Spring. Mais pesado, mas importante entender.", tags:["plus"], stars:3 },
+                { id:"t3", name:"MockMvc — Testar controllers", desc:"Simular chamadas HTTP nos seus controllers sem subir o servidor.", tags:["market","plus"], stars:3 },
+            ]
+        },
+        {
+            id: "p7",
+            num: "07",
+            title: "Boas Práticas & Mercado",
+            meta: "Contínuo · O que separa Júnior de Pleno",
+            topics: [
+                { id:"bp1", name:"Arquitetura em Camadas (Controller→Service→Repository)", desc:"O padrão que 99% dos projetos Spring usam. Saber separar responsabilidades é essencial.", tags:["must","market"], stars:5 },
+                { id:"bp2", name:"Git — GitFlow básico", desc:"Commits semânticos, branches (feature/, hotfix/). Trabalho em equipe exige isso.", tags:["must","market"], stars:5 },
+                { id:"bp3", name:"Docker básico", desc:"Rodar banco e aplicação em container. Muito cobrado mesmo para Júnior.", tags:["market","plus"], stars:4 },
+                { id:"bp4", name:"Postman ou Insomnia", desc:"Testar suas APIs manualmente. Todo dev usa.", tags:["must","market"], stars:4 },
+                { id:"bp5", name:"Swagger / OpenAPI", desc:"Documentar sua API automaticamente. Impressiona em projetos e entrevistas.", tags:["market","plus"], stars:3 },
+            ]
+        }
+    ];
+
+    const tagLabels = { must: "Obrigatório", market: "Mercado", plus: "Diferencial" };
+    const states = ["", "doing", "done"];
+    const stateIcons = { "": "", "doing": "~", "done": "✓" };
+
+    let topicStates = {};
+
+    function loadState() {
+        try {
+            const saved = localStorage.getItem("spring_roadmap_v2");
+            if (saved) topicStates = JSON.parse(saved);
+        } catch(e) {}
+    }
+
+    function saveState() {
+        try { localStorage.setItem("spring_roadmap_v2", JSON.stringify(topicStates)); } catch(e) {}
+    }
+
+    function cycleState(id) {
+        const current = topicStates[id] || "";
+        const idx = states.indexOf(current);
+        topicStates[id] = states[(idx + 1) % states.length];
+        saveState();
+        render();
+    }
+
+    function resetAll() {
+        if (confirm("Resetar todo o progresso?")) {
+            topicStates = {};
+            saveState();
+            render();
+        }
+    }
+
+    function render() {
+        const container = document.getElementById("roadmap");
+
+        // count
+        const allTopics = phases.flatMap(p => p.topics);
+        const doneCount = allTopics.filter(t => topicStates[t.id] === "done").length;
+        const pct = Math.round((doneCount / allTopics.length) * 100);
+        document.getElementById("progressBar").style.width = pct + "%";
+        document.getElementById("pctLabel").textContent = pct + "%";
+
+        container.innerHTML = phases.map(phase => {
+            const phaseTopics = phase.topics;
+            const phaseDone = phaseTopics.filter(t => topicStates[t.id] === "done").length;
+            const isOpen = !container.dataset[phase.id] || container.dataset[phase.id] !== "closed";
+
+            return `
+    <div class="phase ${isOpen ? 'open' : ''}" id="${phase.id}">
+      <div class="phase-header" onclick="togglePhase('${phase.id}')">
+        <span class="phase-num">${phase.num}</span>
+        <span class="phase-title">${phase.title}</span>
+        <span class="phase-meta">${phaseDone}/${phaseTopics.length} · ${phase.meta}</span>
+        <span class="phase-toggle">▶</span>
+      </div>
+      <div class="phase-body">
+        ${phaseTopics.map(topic => {
+                const state = topicStates[topic.id] || "";
+                const icon = stateIcons[state];
+                const stars = Array.from({length:5}, (_,i) =>
+                    `<span class="star ${i < topic.stars ? '' : 'empty'}">★</span>`
+                ).join('');
+                const tagHtml = topic.tags.map(t =>
+                    `<span class="tag tag-${t}">${tagLabels[t]}</span>`
+                ).join('');
+                return `
+          <div class="topic ${state}" onclick="cycleState('${topic.id}')">
+            <div class="topic-check">${icon}</div>
+            <div class="topic-info">
+              <div class="topic-name">${topic.name}</div>
+              <div class="topic-desc">${topic.desc}</div>
+              <div class="topic-tags">${tagHtml}</div>
+              <div class="topic-priority">${stars}</div>
+            </div>
+          </div>`;
+            }).join('')}
+      </div>
+    </div>`;
+        }).join('');
+
+        // re-attach open/close state
+        document.querySelectorAll('.phase').forEach(el => {
+            el.querySelector('.phase-header').addEventListener('click', function() {
+                // handled by togglePhase
+            });
+        });
+    }
+
+    function togglePhase(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('open');
+    }
+
+    loadState();
+    render();
+</script>
+</body>
+</html>
